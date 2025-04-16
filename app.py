@@ -122,6 +122,7 @@ def run_analysis(file_major, file_basic, output_path):
     })
 
     pd.DataFrame([stat]).to_excel(output_path, index=False)
+    return stat
 
 @app.errorhandler(413)
 def file_too_large(e):
