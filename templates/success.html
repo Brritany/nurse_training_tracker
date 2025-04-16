@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>成功上傳</title>
+  <meta charset="UTF-8">
+  <title>分析完成</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body>
-    <h2>✅ 分析完成</h2>
-    <p><a href="{{ url_for('download_summary', uid=uid) }}">點此下載 summary.xlsx</a></p>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="alert alert-success text-center shadow">
+      <h4 class="alert-heading">✅ 分析成功！</h4>
+      <p>系統已完成資料分析，可下載您的 summary 檔案。</p>
+      <hr>
+      <a class="btn btn-success" href="{{ url_for('download_summary', uid=uid) }}">⬇ 下載 summary.xlsx</a>
+    </div>
+  </div>
 </body>
 </html>

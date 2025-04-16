@@ -126,5 +126,15 @@ def run_analysis(file_major, file_basic, output_path):
 
     pd.DataFrame([stat]).to_excel(output_path, index=False)
 
+@app.errorhandler(413)
+def file_too_large(e):
+    return render_template("error.html", message="上傳檔案超過 5MB 限制，請重新選擇較小的檔案。"), 413
+
+@app.errorhandler(400)
+@app.errorhandler(404)
+@app.errorhandler(500)
+def general_error(e):
+    return render_template("error.html", message=str(e)), e.code if hasattr(e, 'code') else 500
+
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=5000)
