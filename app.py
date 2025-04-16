@@ -1,14 +1,22 @@
 import os
-from flask import Flask, request, send_file, render_template
+import uuid
 import pandas as pd
+from flask import Flask, request, send_file, render_template, after_this_request, abort
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 ALLOWED_EXTENSIONS = {'xlsx'}
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB 限制
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# 使用者檔案暫存，用 uid 映射
+session_files = {}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -28,19 +36,46 @@ def upload_file():
     if not allowed_file(major_file.filename) or not allowed_file(basic_file.filename):
         return "請上傳 xlsx 格式檔案", 400
 
-    major_filename = secure_filename(major_file.filename)
-    basic_filename = secure_filename(basic_file.filename)
+    uid = uuid.uuid4().hex
+    major_filename = f"{uid}_major.xlsx"
+    basic_filename = f"{uid}_basic.xlsx"
+    summary_filename = f"{uid}_summary.xlsx"
 
     major_path = os.path.join(app.config['UPLOAD_FOLDER'], major_filename)
     basic_path = os.path.join(app.config['UPLOAD_FOLDER'], basic_filename)
+    summary_path = os.path.join(app.config['UPLOAD_FOLDER'], summary_filename)
 
-    major_file.save(major_path)
-    basic_file.save(basic_path)
+    try:
+        major_file.save(major_path)
+        basic_file.save(basic_path)
+    except Exception:
+        abort(413, description="檔案儲存失敗，可能超過 5MB")
 
-    output_path = os.path.join(app.config['UPLOAD_FOLDER'], "summary.xlsx")
-    run_analysis(major_path, basic_path, output_path)
+    run_analysis(major_path, basic_path, summary_path)
 
-    return send_file(output_path, as_attachment=True)
+    # 記錄這筆 uid → summary 路徑
+    session_files[uid] = [major_path, basic_path, summary_path]
+
+    return render_template('success.html', uid=uid)
+
+@app.route('/download/<uid>')
+def download_summary(uid):
+    if uid not in session_files:
+        return "找不到此檔案", 404
+
+    paths = session_files.pop(uid)
+    summary_path = paths[2]
+
+    @after_this_request
+    def cleanup(response):
+        for f in paths:
+            try:
+                os.remove(f)
+            except Exception as e:
+                print("❌ 清除失敗：", e)
+        return response
+
+    return send_file(summary_path, as_attachment=True, download_name="summary.xlsx")
 
 def run_analysis(file_major, file_basic, output_path):
     df_major = pd.read_excel(file_major, skiprows=7)
