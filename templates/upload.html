@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Excel 分析上傳</title>
+</head>
+<body>
+    <h2>請上傳專業與一般課程 Excel 檔案</h2>
+    <form method="post" action="/upload" enctype="multipart/form-data">
+        <label>專業課程 Excel:</label>
+        <input type="file" name="major_file" required><br><br>
+        <label>一般課程 Excel:</label>
+        <input type="file" name="basic_file" required><br><br>
+        <input type="submit" value="上傳並分析">
+    </form>
+</body>
+</html>
