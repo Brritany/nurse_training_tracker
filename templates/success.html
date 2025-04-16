@@ -15,11 +15,13 @@
     </div>
 
     <h5 class="mt-5">📋 分析摘要</h5>
-    <table class="table table-bordered table-hover">
+    <table class="table table-bordered table-hover align-middle text-center">
       <thead class="table-light">
         <tr>
           <th>項目</th>
           <th>時數</th>
+          <th>通過標準</th>
+          <th>狀態</th>
         </tr>
       </thead>
       <tbody>
@@ -27,6 +29,8 @@
         <tr>
           <td>{{ key }}</td>
           <td>{{ value }}</td>
+          <td>{{ criteria.get(key, '-') }}</td>
+          <td>{{ status.get(key, '-') }}</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -15,8 +15,29 @@ ALLOWED_EXTENSIONS = {'xlsx'}
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB 限制
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-# 使用者檔案暫存，用 uid 映射
 session_files = {}
+
+# ✅ 各項目通過標準（時數）
+PASSING_CRITERIA = {
+    "一般": 15,
+    "專業": 25,
+    "急重症": 13,
+    "跨領域": 3,
+    "消防安全": 1,
+    "師培": 4,
+    "感控": 3,
+    "病人權利": 1,
+    "病人安全": 1,
+    "醫護倫理": 1,
+    "全人醫療": 1,
+    "哀傷輔導": 1,
+    "危機處理": 1,
+    "醫療品質": 1,
+    "醫病溝通": 1,
+    "護理紀錄": 1,
+    "醫事法規": 1,
+    "實證醫學": 1
+}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -52,8 +73,18 @@ def upload_file():
         abort(413, description="檔案儲存失敗，可能超過 5MB")
 
     stat = run_analysis(major_path, basic_path, summary_path)
+
+    # ✅ 計算是否通過（每項 stat >= criteria）
+    status = {}
+    for key, value in stat.items():
+        standard = PASSING_CRITERIA.get(key)
+        if standard is not None:
+            status[key] = "✅" if value >= standard else "❌"
+        else:
+            status[key] = "-"
+
     session_files[uid] = [major_path, basic_path, summary_path]
-    return render_template('success.html', uid=uid, stat=stat)
+    return render_template('success.html', uid=uid, stat=stat, criteria=PASSING_CRITERIA, status=status)
 
 @app.route('/download/<uid>')
 def download_summary(uid):
