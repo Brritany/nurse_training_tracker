@@ -51,12 +51,9 @@ def upload_file():
     except Exception:
         abort(413, description="檔案儲存失敗，可能超過 5MB")
 
-    run_analysis(major_path, basic_path, summary_path)
-
-    # 記錄這筆 uid → summary 路徑
+    stat = run_analysis(major_path, basic_path, summary_path)
     session_files[uid] = [major_path, basic_path, summary_path]
-
-    return render_template('success.html', uid=uid)
+    return render_template('success.html', uid=uid, stat=stat)
 
 @app.route('/download/<uid>')
 def download_summary(uid):

@@ -13,6 +13,28 @@
       <hr>
       <a class="btn btn-success" href="{{ url_for('download_summary', uid=uid) }}">⬇ 下載 summary.xlsx</a>
     </div>
+
+    <h5 class="mt-5">📋 分析摘要</h5>
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>項目</th>
+          <th>時數</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, value in stat.items() %}
+        <tr>
+          <td>{{ key }}</td>
+          <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="text-center mt-4">
+      <a class="btn btn-outline-primary" href="{{ url_for('index') }}">🔁 再次上傳分析</a>
+    </div>
   </div>
 </body>
 </html>
